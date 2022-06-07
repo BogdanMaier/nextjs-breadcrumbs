@@ -45,7 +45,7 @@ const convertBreadcrumb = (
     }
   }
 
-  // decode for utf-8 characters and return ascii. 
+  // decode for utf-8 characters and return ascii.
   return toUpperCase ? decodeURI(transformedTitle).toUpperCase() : decodeURI(transformedTitle);
 };
 
@@ -93,7 +93,7 @@ export interface BreadcrumbsProps {
   containerStyle?: any | null;
 
   /** Classes to be used for the outer container. Won't be used if useDefaultStyle is true */
-  containerClassName?: string;
+  className?: string;
 
   /** An inline style object for the breadcrumb list */
   listStyle?: any | null;
@@ -112,6 +112,9 @@ export interface BreadcrumbsProps {
 
   /** Classes to be used for the active breadcrumb list item */
   activeItemClassName?: string;
+
+  /** Use staticBreadcrumbs when you want to create a breadcrumbs instance independent from the router */
+  staticBreadcrumbs?: Array<Breadcrumb>;
 }
 
 const defaultProps: BreadcrumbsProps = {
@@ -119,17 +122,18 @@ const defaultProps: BreadcrumbsProps = {
   rootLabel: 'Home',
   omitRootLabel: false,
   labelsToUppercase: false,
-  replaceCharacterList: [{ from: '-', to: ' ' }],
+  replaceCharacterList: [{from: '-', to: ' '}],
   transformLabel: undefined,
   omitIndexList: undefined,
   containerStyle: null,
-  containerClassName: '',
+  className: '',
   listStyle: null,
   listClassName: '',
   inactiveItemStyle: null,
   inactiveItemClassName: '',
   activeItemStyle: null,
   activeItemClassName: '',
+  staticBreadcrumbs: undefined,
 };
 
 /**
@@ -154,21 +158,22 @@ const Breadcrumbs = ({
   transformLabel,
   omitIndexList,
   containerStyle,
-  containerClassName,
   listStyle,
   listClassName,
   inactiveItemStyle,
   inactiveItemClassName,
   activeItemStyle,
   activeItemClassName,
+  staticBreadcrumbs,
+  className,
 }: BreadcrumbsProps) => {
   const router = useRouter();
-  const [breadcrumbs, setBreadcrumbs] = useState<Array<Breadcrumb> | null>(
-    null
-  );
+  const [breadcrumbs, setBreadcrumbs] = useState<Array<Breadcrumb> | null>(null);
 
   useEffect(() => {
-    if (router) {
+    if (staticBreadcrumbs) {
+      setBreadcrumbs(staticBreadcrumbs);
+    } else if (router) {
       const linkPath = router.asPath.split('/');
       linkPath.shift();
 
@@ -190,7 +195,7 @@ const Breadcrumbs = ({
   return (
     <nav
       style={containerStyle}
-      className={containerClassName}
+      className={className}
       aria-label="breadcrumbs"
     >
       <ol
@@ -211,8 +216,8 @@ const Breadcrumbs = ({
             </Link>
           </li>
         )}
-        {breadcrumbs.length >= 1 &&
-          breadcrumbs.map((breadcrumb, i) => {
+        {breadcrumbs!.length >= 1 &&
+          breadcrumbs!.map((breadcrumb, i) => {
             if (
               !breadcrumb ||
               breadcrumb.breadcrumb.length === 0 ||
@@ -224,12 +229,12 @@ const Breadcrumbs = ({
               <li
                 key={breadcrumb.href}
                 className={
-                  i === breadcrumbs.length - 1
+                  i === breadcrumbs!.length - 1
                     ? activeItemClassName
                     : inactiveItemClassName
                 }
                 style={
-                  i === breadcrumbs.length - 1
+                  i === breadcrumbs!.length - 1
                     ? activeItemStyle
                     : inactiveItemStyle
                 }
